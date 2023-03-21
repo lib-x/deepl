@@ -3,9 +3,7 @@ package deepl
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
 	"github.com/abadojack/whatlanggo"
-	"io"
 	"math/big"
 	"math/rand"
 	"net/http"
@@ -17,66 +15,6 @@ const (
 	deepLRpcServer   = "https://www2.deepl.com/jsonrpc"
 	deepLReferServer = "https://www.deepl.com/"
 )
-
-var (
-	ErrorNoTranslateTextFound = errors.New("no Translate Text Found")
-	ErrorInvalidTargetLang    = errors.New("invalid Target Lang")
-	ErrorTooManyRequests      = errors.New("too Many Requests")
-)
-
-type Lang struct {
-	SourceLangUserSelected string `json:"source_lang_user_selected"`
-	TargetLang             string `json:"target_lang"`
-}
-
-type CommonJobParameters struct {
-	WasSpoken       bool   `json:"wasSpoken,omitempty"`
-	TranscribeAS    string `json:"transcribe_as,omitempty"`
-	RegionalVariant string `json:"regionalVariant,omitempty"`
-}
-
-type TextTranslationJsonRpcRequestParams struct {
-	Texts           []TextParam         `json:"texts"`
-	Splitting       string              `json:"splitting"`
-	Lang            Lang                `json:"lang"`
-	Timestamp       int64               `json:"timestamp"`
-	CommonJobParams CommonJobParameters `json:"commonJobParams"`
-}
-type TextTranslationJsonResponse struct {
-	Texts               []TextWithAlternatives `json:"texts"`
-	LanguageCode        string                 `json:"lang"`
-	LanguageIsConfident bool                   `json:"lang_is_confident"`
-	DetectedLanguages   map[string]float64     `json:"detectedLanguages"`
-}
-type Text struct {
-	Text string `json:"text"`
-}
-
-type ErrorInfo struct {
-	ErrorCode int `json:"code"`
-}
-
-type TextWithAlternatives struct {
-	Text
-	Alternatives []Text `json:"alternatives,omitempty"`
-}
-type TextParam struct {
-	Text
-	RequestAlternatives int `json:"requestAlternatives,omitempty"`
-}
-
-type JsonRpcResponse struct {
-	Jsonrpc   string                      `json:"jsonrpc"`
-	Id        int64                       `json:"id"`
-	Result    TextTranslationJsonResponse `json:"result"`
-	ErrorInfo *ErrorInfo                  `json:"error,omitempty"`
-}
-type JsonRpcRequest struct {
-	Jsonrpc string                              `json:"jsonrpc"`
-	Method  string                              `json:"method"`
-	Id      int64                               `json:"id"`
-	Params  TextTranslationJsonRpcRequestParams `json:"params"`
-}
 
 func newJsonRpcRequest(sourceLang string, targetLang string) *JsonRpcRequest {
 	return &JsonRpcRequest{
@@ -205,15 +143,12 @@ func Translate(sourceLanguage, targetLanguage, textToTranslate string) (jsonRpcR
 	if err != nil {
 		return nil, err
 	}
-
+	defer resp.Body.Close()
 	if resp.StatusCode == http.StatusTooManyRequests {
 		return jsonRpcResponse, ErrorTooManyRequests
 	}
-
-	body, _ := io.ReadAll(resp.Body)
-	defer resp.Body.Close()
 	jsonRpcResponse = &JsonRpcResponse{}
-	if err = json.Unmarshal(body, jsonRpcResponse); err != nil {
+	if err := json.NewDecoder(resp.Body).Decode(jsonRpcResponse); err != nil {
 		return nil, err
 	}
 	if jsonRpcResponse.ErrorInfo != nil {
