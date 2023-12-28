@@ -151,7 +151,9 @@ func Translate(sourceLanguage, targetLanguage, textToTranslate string) (jsonRpcR
 	if err != nil {
 		return nil, err
 	}
-
+	if resp == nil {
+		return nil, ErrorInvalidResponse
+	}
 	var bodyReader io.Reader
 	switch resp.Header.Get("Content-Encoding") {
 	case "br":
