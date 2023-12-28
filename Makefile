@@ -9,7 +9,7 @@ all: build lint test
 
 .PHONY: build
 build:
-	go install go.uber.org/nilaway/cmd/nilaway
+	go install go.uber.org/nilaway/cmd/nilaway@latest
 
 .PHONY: test
 test:
