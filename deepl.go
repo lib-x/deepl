@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"encoding/json"
 	"github.com/abadojack/whatlanggo"
+	"github.com/andybalholm/brotli"
+	"io"
 	"math/big"
 	"math/rand"
 	"net/http"
@@ -27,8 +29,8 @@ func newJsonRpcRequest(sourceLang string, targetLang string) *JsonRpcRequest {
 				TargetLang:             targetLang,
 			},
 			CommonJobParams: CommonJobParameters{
-				//WasSpoken:    false,
-				//TranscribeAS: "",
+				WasSpoken:    false,
+				TranscribeAS: "",
 				// RegionalVariant: "en-US",
 			},
 		},
@@ -133,9 +135,9 @@ func Translate(sourceLanguage, targetLanguage, textToTranslate string) (jsonRpcR
 	request.Header.Set("Accept-Language", "en-US,en;q=0.9")
 	request.Header.Set("Accept-Encoding", "gzip, deflate, br")
 	request.Header.Set("x-app-device", "iPhone13,2")
-	request.Header.Set("User-Agent", "DeepL-iOS/2.6.0 iOS 16.3.0 (iPhone13,2)")
-	request.Header.Set("x-app-build", "353933")
-	request.Header.Set("x-app-version", "2.6")
+	request.Header.Set("User-Agent", "DeepL-iOS/2.9.1 iOS 16.3.0 (iPhone13,2)")
+	request.Header.Set("x-app-build", "510265")
+	request.Header.Set("x-app-version", "2.9.1")
 	request.Header.Set("Connection", "keep-alive")
 
 	client := &http.Client{}
@@ -143,12 +145,22 @@ func Translate(sourceLanguage, targetLanguage, textToTranslate string) (jsonRpcR
 	if err != nil {
 		return nil, err
 	}
+
+	var bodyReader io.Reader
+	switch resp.Header.Get("Content-Encoding") {
+	case "br":
+		bodyReader = brotli.NewReader(resp.Body)
+	default:
+		bodyReader = resp.Body
+	}
 	defer resp.Body.Close()
+
 	if resp.StatusCode == http.StatusTooManyRequests {
 		return jsonRpcResponse, ErrorTooManyRequests
 	}
+
 	jsonRpcResponse = &JsonRpcResponse{}
-	if err := json.NewDecoder(resp.Body).Decode(jsonRpcResponse); err != nil {
+	if err := json.NewDecoder(bodyReader).Decode(jsonRpcResponse); err != nil {
 		return nil, err
 	}
 	if jsonRpcResponse.ErrorInfo != nil {
