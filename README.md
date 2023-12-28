@@ -8,7 +8,7 @@ deepL windows Client download Url： https://appdownload.deepl.com/windows/0inst
 
 Example:
 ```go
-import "github.com/czyt/deepl"
+import "github.com/tiny-lib/deepl"
 translateResp, err := Translate("", "zh", "I love Go programming language")
 	if err != nil {
 		t.Fatal(err)
