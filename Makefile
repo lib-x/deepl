@@ -42,5 +42,5 @@ tidy-lint:
 
 .PHONY: nilaway-lint
 nilaway-lint: build
-	@echo "[lint] nilaway linting itself"
-	@$(GOBIN)/nilaway -include-pkgs="go.uber.org/nilaway" ./...
+	@echo "[lint] nilaway linting package"
+	@$(GOBIN)/nilaway .
