@@ -1,0 +1,29 @@
+name: Go
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        name: Check out repository
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: 1.21.x
+          cache: false
+
+      - uses: golangci/golangci-lint-action@v3
+        name: Install golangci-lint
+        with:
+          version: latest
+          args: --version
+
+      - run: make lint
+        name: Lint
