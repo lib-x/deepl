@@ -18,6 +18,12 @@ const (
 	deepLReferServer = "https://www.deepl.com/"
 )
 
+var (
+	methodPartNormal       = []byte("\"method\":\"")
+	methodPartWithOneSpace = []byte("\"method\": \"")
+	methodPartWithTwoSpace = []byte("\"method\" : \"")
+)
+
 func newJsonRpcRequest(sourceLang string, targetLang string) *JsonRpcRequest {
 	return &JsonRpcRequest{
 		Jsonrpc: "2.0",
@@ -62,9 +68,9 @@ func generateTimestamp(iCount int64) int64 {
 func adjustJsonContent(id int64, jsonContent []byte) []byte {
 	// add space if necessary
 	if (id+5)%29 == 0 || (id+3)%13 == 0 {
-		jsonContent = bytes.ReplaceAll(jsonContent, []byte("\"method\":\""), []byte("\"method\" : \""))
+		jsonContent = bytes.ReplaceAll(jsonContent, methodPartNormal, methodPartWithTwoSpace)
 	} else {
-		jsonContent = bytes.ReplaceAll(jsonContent, []byte("\"method\":\""), []byte("\"method\": \""))
+		jsonContent = bytes.ReplaceAll(jsonContent, methodPartNormal, methodPartWithOneSpace)
 	}
 	return jsonContent
 }
