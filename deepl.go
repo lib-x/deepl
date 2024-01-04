@@ -5,9 +5,12 @@ import (
 	"encoding/json"
 	"github.com/abadojack/whatlanggo"
 	"github.com/andybalholm/brotli"
+	"golang.org/x/net/context"
+	"golang.org/x/net/proxy"
 	"io"
 	"math/big"
 	"math/rand"
+	"net"
 	"net/http"
 	"net/url"
 	"strings"
@@ -155,10 +158,27 @@ func Translate(sourceLanguage, targetLanguage, textToTranslate string, options .
 	request.Header.Set("Connection", "keep-alive")
 
 	client := &http.Client{}
+
 	if clientOpt.httpProxy != "" {
 		httpProxy, _ := url.Parse(clientOpt.httpProxy)
 		if httpProxy != nil {
-			client.Transport = &http.Transport{Proxy: http.ProxyURL(httpProxy)}
+			transport := &http.Transport{Proxy: http.ProxyURL(httpProxy)}
+			client.Transport = transport
+		}
+	}
+
+	if clientOpt.socket5Proxy != "" {
+		var auth *proxy.Auth
+		if clientOpt.socket5ProxyUser != "" || clientOpt.socket5proxyPassword != "" {
+			auth = &proxy.Auth{User: clientOpt.socket5ProxyUser, Password: clientOpt.socket5proxyPassword}
+		}
+		dialer, err := proxy.SOCKS5("tcp", clientOpt.socket5Proxy, auth, proxy.Direct)
+		if err == nil && dialer != nil {
+			dialContext := func(ctx context.Context, network, address string) (net.Conn, error) {
+				return dialer.Dial(network, address)
+			}
+			transport := &http.Transport{DialContext: dialContext}
+			client.Transport = transport
 		}
 	}
 
