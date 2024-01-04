@@ -172,8 +172,8 @@ func Translate(sourceLanguage, targetLanguage, textToTranslate string, options .
 		if clientOpt.socket5ProxyUser != "" || clientOpt.socket5proxyPassword != "" {
 			auth = &proxy.Auth{User: clientOpt.socket5ProxyUser, Password: clientOpt.socket5proxyPassword}
 		}
-		dialer, _ := proxy.SOCKS5("tcp", clientOpt.socket5Proxy, auth, proxy.Direct)
-		if dialer != nil {
+		dialer, err := proxy.SOCKS5("tcp", clientOpt.socket5Proxy, auth, proxy.Direct)
+		if err == nil {
 			dialContext := func(ctx context.Context, network, address string) (net.Conn, error) {
 				return dialer.Dial(network, address)
 			}
