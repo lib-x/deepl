@@ -9,6 +9,7 @@ import (
 	"math/big"
 	"math/rand"
 	"net/http"
+	"net/url"
 	"strings"
 	"time"
 )
@@ -100,7 +101,14 @@ func adjustJsonContent(id int64, jsonContent []byte) []byte {
 // SK: Slovakian
 // SL: Slovenian
 // SV: Swedish
-func Translate(sourceLanguage, targetLanguage, textToTranslate string) (jsonRpcResponse *JsonRpcResponse, err error) {
+func Translate(sourceLanguage, targetLanguage, textToTranslate string, options ...Option) (jsonRpcResponse *JsonRpcResponse, err error) {
+
+	clientOpt := &deepLClientOption{}
+	if len(options) > 0 {
+		for _, optFunc := range options {
+			optFunc(clientOpt)
+		}
+	}
 	if sourceLanguage == "" {
 		lang := whatlanggo.DetectLang(textToTranslate)
 		deepLLang := strings.ToUpper(lang.Iso6391())
@@ -147,6 +155,13 @@ func Translate(sourceLanguage, targetLanguage, textToTranslate string) (jsonRpcR
 	request.Header.Set("Connection", "keep-alive")
 
 	client := &http.Client{}
+	if clientOpt.httpProxy != "" {
+		httpProxy, _ := url.Parse(clientOpt.httpProxy)
+		if httpProxy != nil {
+			client.Transport = &http.Transport{Proxy: http.ProxyURL(httpProxy)}
+		}
+	}
+
 	resp, err := client.Do(request)
 	if err != nil {
 		return nil, err
