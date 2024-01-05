@@ -1,4 +1,4 @@
-module github.com/tiny-lib/deepl
+module github.com/lib-x/deepl
 
 go 1.18
 
