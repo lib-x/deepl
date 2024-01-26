@@ -2,6 +2,7 @@ package deepl
 
 import (
 	"bytes"
+	"crypto/tls"
 	"encoding/json"
 	"github.com/abadojack/whatlanggo"
 	"github.com/andybalholm/brotli"
@@ -158,7 +159,7 @@ func Translate(sourceLanguage, targetLanguage, textToTranslate string, options .
 	request.Header.Set("Connection", "keep-alive")
 
 	client := &http.Client{}
-	if transport := createHttpProxyTransport(clientOpt); transport != nil {
+	if transport := createProxyTransportWith(clientOpt); transport != nil {
 		client.Transport = transport
 	}
 	resp, err := client.Do(request)
@@ -193,14 +194,14 @@ func Translate(sourceLanguage, targetLanguage, textToTranslate string, options .
 	return jsonRpcResponse, nil
 }
 
-func createHttpProxyTransport(clientOpt *deepLClientOption) *http.Transport {
+func createProxyTransportWith(clientOpt *deepLClientOption) *http.Transport {
+	var transport *http.Transport
 	if clientOpt.httpProxy != "" {
 		httpProxy, _ := url.Parse(clientOpt.httpProxy)
 		if httpProxy != nil {
-			return &http.Transport{Proxy: http.ProxyURL(httpProxy)}
+			transport = &http.Transport{Proxy: http.ProxyURL(httpProxy)}
 		}
 	}
-
 	if clientOpt.socket5Proxy != "" {
 		var auth *proxy.Auth
 		if clientOpt.socket5ProxyUser != "" || clientOpt.socket5proxyPassword != "" {
@@ -211,8 +212,11 @@ func createHttpProxyTransport(clientOpt *deepLClientOption) *http.Transport {
 			dialContext := func(ctx context.Context, network, address string) (net.Conn, error) {
 				return dialer.Dial(network, address)
 			}
-			return &http.Transport{DialContext: dialContext}
+			transport = &http.Transport{DialContext: dialContext}
 		}
+	}
+	if clientOpt.ignoreSSLVerification && transport != nil {
+		transport.TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 	}
 	return nil
 }
