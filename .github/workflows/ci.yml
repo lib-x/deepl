@@ -20,10 +20,8 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version: stable
-      - name: golangci-lint
+      - name: nilaway
         uses: golangci/golangci-lint-action@v6
         with:
-          # 必须指定版本
           version: v1.60
-          # 可选: 显示仅新发现的问题
           only-new-issues: true
