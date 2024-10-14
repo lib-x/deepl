@@ -5,10 +5,47 @@ type deepLClientOption struct {
 	socket5Proxy          string
 	socket5ProxyUser      string
 	socket5proxyPassword  string
+	dlSession             string
+	tagHandling           string
+	useDeepLPro           bool
 	ignoreSSLVerification bool
 }
 
+type TagHandlingType int
+
+const (
+	TagHandlingHtml TagHandlingType = iota
+	TagHandlingXml  TagHandlingType = iota
+)
+
 type Option func(option *deepLClientOption)
+
+// WithTagHandling TagHandling: type of tags to parse before translation, options are "html" and "xml"
+// Todo: support xml options，see https://www.nuget.org/packages/DeepL.net/
+func WithTagHandling(handingType TagHandlingType) Option {
+	tagHandlingType := ""
+	switch handingType {
+	case TagHandlingHtml:
+		tagHandlingType = "html"
+	case TagHandlingXml:
+		tagHandlingType = "xml"
+	}
+	return func(option *deepLClientOption) {
+		if tagHandlingType != "" {
+			option.tagHandling = tagHandlingType
+		}
+	}
+}
+
+// WithDeeplProSession set deepl pro session.if session is set,
+func WithDeeplProSession(dlSession string) Option {
+	return func(option *deepLClientOption) {
+		if len(dlSession) == 36 {
+			option.useDeepLPro = true
+			option.dlSession = dlSession
+		}
+	}
+}
 
 // WithHttpProxy  set http proxy.if both httpProxy and sock5 proxy are set,
 // http proxy will be over-wrote by sock5 proxy .example http://127.0.0.1:1080

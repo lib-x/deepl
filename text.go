@@ -6,6 +6,7 @@ type TextTranslationJsonRpcRequestParams struct {
 	Lang            Lang                `json:"lang"`
 	Timestamp       int64               `json:"timestamp"`
 	CommonJobParams CommonJobParameters `json:"commonJobParams"`
+	TagHandling     string              `json:"tag_handling"`
 }
 type TextTranslationJsonResponse struct {
 	Texts               []TextWithAlternatives `json:"texts"`

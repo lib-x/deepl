@@ -1,6 +1,6 @@
 module github.com/lib-x/deepl
 
-go 1.18
+go 1.23
 
 require (
 	github.com/abadojack/whatlanggo v1.0.1

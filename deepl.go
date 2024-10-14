@@ -19,8 +19,8 @@ import (
 )
 
 const (
-	deepLRpcServer   = "https://www2.deepl.com/jsonrpc"
-	deepLReferServer = "https://www.deepl.com/"
+	deepLRpcServer  = "https://api.deepl.com/jsonrpc"
+	deepLXRpcServer = "https://www2.deepl.com/jsonrpc"
 )
 
 var (
@@ -106,6 +106,10 @@ func adjustJsonContent(id int64, jsonContent []byte) []byte {
 // SL: Slovenian
 // SV: Swedish
 func Translate(sourceLanguage, targetLanguage, textToTranslate string, options ...Option) (jsonRpcResponse *JsonRpcResponse, err error) {
+	var (
+		requestServer = deepLXRpcServer
+		headerIter    = deeplXHeaderIter()
+	)
 
 	clientOpt := &deepLClientOption{}
 	if len(options) > 0 {
@@ -129,6 +133,9 @@ func Translate(sourceLanguage, targetLanguage, textToTranslate string, options .
 		Text:                Text{Text: textToTranslate},
 		RequestAlternatives: 3,
 	}
+	if clientOpt.tagHandling != "" {
+		postData.Params.TagHandling = clientOpt.tagHandling
+	}
 	// set id
 	id := generateNextId() + 1
 	postData.Id = id
@@ -139,24 +146,19 @@ func Translate(sourceLanguage, targetLanguage, textToTranslate string, options .
 	postByte, _ := json.Marshal(postData)
 	postByte = adjustJsonContent(id, postByte)
 	reader := bytes.NewReader(postByte)
-	request, err := http.NewRequest("POST", deepLRpcServer, reader)
+	if clientOpt.useDeepLPro {
+		requestServer = deepLRpcServer
+		headerIter = deeplProHeaderIter(clientOpt.dlSession)
+	}
+	request, err := http.NewRequest("POST", requestServer, reader)
 	if err != nil {
 		return nil, err
 	}
-
 	// Set Headers
-	request.Header.Set("Referer", deepLReferServer)
-	request.Header.Set("Content-Type", "application/json")
-	request.Header.Set("Accept", "*/*")
-	request.Header.Set("x-app-os-name", "iOS")
-	request.Header.Set("x-app-os-version", "16.3.0")
-	request.Header.Set("Accept-Language", "en-US,en;q=0.9")
-	request.Header.Set("Accept-Encoding", "gzip, deflate, br")
-	request.Header.Set("x-app-device", "iPhone13,2")
-	request.Header.Set("User-Agent", "DeepL-iOS/2.9.1 iOS 16.3.0 (iPhone13,2)")
-	request.Header.Set("x-app-build", "510265")
-	request.Header.Set("x-app-version", "2.9.1")
-	request.Header.Set("Connection", "keep-alive")
+
+	for headerKey, headValue := range headerIter {
+		request.Header.Set(headerKey, headValue)
+	}
 
 	client := &http.Client{}
 	if transport := createProxyTransportWith(clientOpt); transport != nil {
