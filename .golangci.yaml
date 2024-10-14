@@ -5,3 +5,6 @@ linters-settings:
       description: Static analysis tool to detect potential nil panics in Go code.
       settings:
         include-pkgs: "github.com/lib-x/deepl"
+linters:
+  enable:
+    - nilaway
