@@ -13,7 +13,7 @@ func TestTranslate(t *testing.T) {
 
 func TestTranslateWithProSession(t *testing.T) {
 	options := []Option{
-		WithDeeplProSession("fa.e4xxxxxxxxxxxxxxxxxxx"),
+		WithDeeplProSession("fa.xxxxx-xxxx-xxxxx-xxxx-xxxxxxx"),
 	}
 	translate, err := Translate("", "zh", "I am the apple of my father's eyes", options...)
 	if err != nil {
