@@ -1,32 +1,29 @@
-name: Go
-
+name: golangci-lint
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main
+      - master
   pull_request:
 
+permissions:
+  contents: read
+  # 可选: 允许读取 pull request。与 'only-new-issues' 选项一起使用。
+  # pull-requests: read
+
 jobs:
-  lint:
-    name: Lint
+  golangci:
+    name: lint
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-        name: Check out repository
-
-      - name: Set up Go
-        uses: actions/setup-go@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
         with:
-          go-version: 1.21.x
-          cache: false
-          
-      - uses: morphy2k/revive-action@v2.5.6
-        name: Revive Action
-        
-      - uses: golangci/golangci-lint-action@v3
-        name: Install golangci-lint
+          go-version: stable
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v6
         with:
-          version: latest
-          args: --version
-
-      - run: make lint
-        name: Lint
+          # 必须指定版本
+          version: v1.60
+          # 可选: 显示仅新发现的问题
+          only-new-issues: true
