@@ -26,5 +26,9 @@ jobs:
           args: custom
           version: v1.60
           only-new-issues: true
-      - name: run lint
-        run : custom-gcl run ./...
+
+      - name: install nilaway
+        run: go install go.uber.org/nilaway/cmd/nilaway@latest
+
+      - name: run nilway lint
+        run: nilaway -include-pkgs="github.com/lib-x/deepl" ./...
