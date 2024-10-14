@@ -22,8 +22,10 @@ jobs:
           go-version: stable
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v6
+        install-mode: "goinstall"
         with:
+          args: custom
           version: v1.60
           only-new-issues: true
-      - name: run nilaway check
-        run: golangci-lint custom && ./custom-gcl run ./...
+      - name: run lint
+        run : custom-gcl run ./...
