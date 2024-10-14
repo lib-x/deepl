@@ -20,8 +20,10 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version: stable
-      - name: nilaway
+      - name: golangci-lint
         uses: golangci/golangci-lint-action@v6
         with:
           version: v1.60
           only-new-issues: true
+      - name: run nilaway check
+        run: ./custom-gcl run ./...
