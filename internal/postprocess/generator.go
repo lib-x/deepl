@@ -27,3 +27,8 @@ func generateTimestamp(iCount int64) int64 {
 		return ts
 	}
 }
+
+func GenerateRandomNumber() int64 {
+	myRand := rand.New(rand.NewSource(time.Now().UnixNano()))
+	return myRand.Int63n(100000) + 83000000000
+}
