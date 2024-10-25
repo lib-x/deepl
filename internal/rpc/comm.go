@@ -1,4 +1,4 @@
-package deepl
+package rpc
 
 type Lang struct {
 	SourceLangUserSelected string `json:"source_lang_user_selected"`

@@ -1,4 +1,4 @@
-package deepl
+package innererrors
 
 import "errors"
 
@@ -6,6 +6,5 @@ var (
 	ErrorNoTranslateTextFound = errors.New("no Translate Text Found")
 	ErrorInvalidTargetLang    = errors.New("invalid Target Lang")
 	ErrorTooManyRequests      = errors.New("too Many Requests")
-
-	ErrorInvalidResponse = errors.New("invalid response")
+	ErrorInvalidResponse      = errors.New("invalid response")
 )

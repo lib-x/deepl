@@ -1,4 +1,4 @@
-package deepl
+package rpc
 
 type JsonRpcResponse struct {
 	Jsonrpc   string                      `json:"jsonrpc"`

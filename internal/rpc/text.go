@@ -1,4 +1,4 @@
-package deepl
+package rpc
 
 type TextTranslationJsonRpcRequestParams struct {
 	Texts           []TextParam         `json:"texts"`
